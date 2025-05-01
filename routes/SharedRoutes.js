@@ -24,9 +24,24 @@ const dt = new Date();
 const month = dt.getMonth();
 const year = dt.getFullYear();
 const route = express.Router();
-
+const SchoolModel = require("../models/SchoolModel");
 route.get("/", async (req, res) => {
   res.send("shared rotes");
+});
+
+route.get("/getAlladmin", async (req, res) => {
+  await SchoolModel.find({ role: role.Admin })
+    .then((user) => {
+      if (user) {
+        return res.json(user);
+      } else {
+        return res.json({ success: false, error: "User does not exists" });
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.json({ success: false, error: "WRONG error" });
+    });
 });
 
 //staff count
@@ -281,6 +296,7 @@ route.post("/signin", async (req, res) => {
 
  console.log('body',body)
   const { error } = login.validate(body);
+  console.log('error',error)
   if (error) {
     return res.send({ error: error.details[0].message, success: false });
   }

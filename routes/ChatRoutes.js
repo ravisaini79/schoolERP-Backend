@@ -34,7 +34,7 @@ route.post("/user", async (req, res) => {
 route.post("/", (req, res) => {
   client.messages
     .create({
-      from: process.env.TWILIO_PHONE_NUMBER,
+      from: process.env.TWILIO_PHONE_NUMBER || '7597622618',
       to: req.body.telephone,
       body: req.body.message,
     })

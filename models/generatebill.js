@@ -5,6 +5,7 @@ const { Schema } = mongoose;
 
 const BillSchema = new Schema(
   {
+    user_Id: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
     studentId: {
       type: Schema.Types.ObjectId,
       ref: "students", // Reference to the Student collection

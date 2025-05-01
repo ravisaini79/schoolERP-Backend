@@ -4,6 +4,7 @@ const { Schema } = mongoose;
 
 const DeductionsSchema = new Schema(
   {
+    user_Id: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
     name: {
       type: String,
     },

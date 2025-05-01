@@ -4,6 +4,7 @@ const { Schema } = mongoose;
 
 const SBASchema = new Schema(
   {
+    user_Id: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
     year: {
       type: String,
     },

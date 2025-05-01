@@ -4,6 +4,7 @@ const { Schema } = mongoose;
 
 const OptionsModel = new Schema(
   {
+    user_Id: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
     events: {
       type: [
         {

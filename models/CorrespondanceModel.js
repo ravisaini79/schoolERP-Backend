@@ -4,6 +4,7 @@ const { Schema } = mongoose;
 
 const CorrespondanceSchema = new Schema(
   {
+    user_Id: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
     address: {
       type: String,
       required: true,

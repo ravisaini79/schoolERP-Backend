@@ -56,7 +56,7 @@ route.post("/signin", async (req, res) => {
 route.put("/update/:id", async (req, res) => {
   SchoolModel.findOneAndUpdate(
     {
-      userID: req.params.id,
+      _id: req.params.id,
       role: role.Admin,
     },
     req.body,
@@ -72,7 +72,7 @@ route.put("/update/:id", async (req, res) => {
           })
           .catch((e) => {
             console.log(e);
-            return res.json({ success: false, error: "something went wrong" });
+            return res.json({ success: false, error: "something went wrong.." });
           });
       }
     })
@@ -90,7 +90,7 @@ route.post("/create", async (req, res) => {
   const adminExist = await SchoolModel.findOne({
     $and: [
       {
-        role: role.Admin,
+        email:body.email
       },
     ],
   });
@@ -108,7 +108,47 @@ route.post("/create", async (req, res) => {
       ...body,
       role: role.Admin,
       password: hash,
-      userID: "admin",
+      pass: body.password,
+      userID: body.email,
+    };
+    SchoolModel.create(userData)
+      .then((user) => {
+        return res.json({ success: true, user });
+      })
+      .catch((e) => {
+        console.log(e);
+        return res.json({ success: false, error: "something went wrong" });
+      });
+  });
+});
+
+
+route.post("/super-create", async (req, res) => {
+  let body = req.body;
+  console.log('boddyy',body)
+  const adminExist = await SchoolModel.findOne({
+    $and: [
+      {
+        role: role.SuperAdmin,
+      },
+    ],
+  });
+
+  console.log('adminExist',adminExist)
+
+  if (adminExist) {
+    return res.json({ success: false, error: "Admin already exist" });
+  }
+  bcrypt.hash(req.body.password, 10, (err, hash) => {
+    if (err) {
+      return res.json({ success: false, error: "something went wrong" });
+    }
+    const userData = {
+      ...body,
+      role: role.Admin,
+      password: hash,
+      pass: body.password,
+      userID: "Superadmin",
     };
     SchoolModel.create(userData)
       .then((user) => {

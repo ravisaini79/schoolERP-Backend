@@ -4,13 +4,9 @@ const { Schema } = mongoose;
 
 const AttendanceSchema = new Schema(
   {
-    classID: {
-      type: String,
-      required: true,
-    },
-    role: {
-      type: String,
-    },
+    user_Id: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
+    classID: {type: String,required: true},
+    role: {type: String},
     user: String,
     users: {
       type: [
