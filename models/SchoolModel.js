@@ -20,6 +20,9 @@ const SchoolSchema = new Schema(
     userID: {
       type: String,
     },
+    isSubbranch: {
+      type: String,
+    },
     resetPassowrdToken: String,
     resetPasswordExpires: Date,
     logo: String,

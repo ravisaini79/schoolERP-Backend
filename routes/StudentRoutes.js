@@ -45,6 +45,8 @@ route.get("/getAll/:id", async (req, res) => {
       user_Id:userId,
     }).sort({ createdAt: -1 }); // You can use -1 for descending order too
 
+    console.log('students',students)
+
     const activeStudents = students.filter((student) => student.withdraw === false);
 
     if (activeStudents.length <= 0) {

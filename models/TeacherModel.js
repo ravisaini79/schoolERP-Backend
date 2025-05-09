@@ -138,6 +138,7 @@ const TeacherSchema = new Schema(
       default: Date.now,
     },
     pass:String,
+    teacherID:String,
   },
   { timestamps: true }
 );
