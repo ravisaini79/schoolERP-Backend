@@ -44,7 +44,8 @@ const UsersRoutes = require("./routes/UsersRoutes");
 const SBARoutes = require("./routes/SBARoutes");
 const NonPaymentRoutes = require("./routes/NonBillPaymentRoutes");
 const generatebill = require('./models/generatebill')
-
+const SchoolSubbranchRoutes = require("./routes/SchoolSubbranchRoutes");
+const subjectGroupRoutes = require('./routes/SubjectGroup');
 const path = require("path");
 //const __dirname = path.resolve(path.dirname(""));
 
@@ -72,12 +73,17 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(bodyParser.json());
 app.use(express.static(__dirname + "/consumerPhotos"));
 app.use(express.static("./public"));
-
+const subjectRoutes = require("./routes/SubjectsRoutes");
 //routes
 app.get("/", (req, res) => {
   res.send("welcome to D-system api");
 });
 
+
+app.use('/api/subject-groups', subjectGroupRoutes);
+
+app.use("/api/subjects", subjectRoutes);
+app.use("/api/subbranches", SchoolSubbranchRoutes);
 app.use("/api/students", StudentRoutes);
 app.use("/api/activitylog", ActivityRoutes);
 app.use("/api/attendance", AttendanceRoutes);

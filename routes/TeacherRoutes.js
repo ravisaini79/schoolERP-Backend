@@ -103,7 +103,8 @@ route.post("/create", async (req, res) => {
     name: body?.name,
     surname: body?.surname,
     email: body?.email,
-    role: body.position,
+    pass:body.password,
+    role:role.Teacher,
     gender: stringtoLowerCaseSpace(body?.gender),
     telephone: stringSpace(body?.telephone),
   };
@@ -143,7 +144,10 @@ route.post("/create", async (req, res) => {
     const userData = {
       ...body,
       password: hash,
-      userID: userID,
+      pass:body.password,
+      userID: body.email,
+      teacherID: userID,
+      pass:body.password,
     };
     TeacherModel.create(userData)
       .then((user) => {

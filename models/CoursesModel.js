@@ -4,6 +4,7 @@ const { Schema } = mongoose;
 
 const CourserSchema = new Schema(
   {
+    user_Id: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
     date: {
       type: Date,
       default: Date.now,

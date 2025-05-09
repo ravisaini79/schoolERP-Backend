@@ -4,7 +4,9 @@ const { Schema } = mongoose;
 
 const DivisionSchema = new Schema(
   {
-    name: {
+    user_Id: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
+    name:
+     {
       type: String,
     },
     description: {

@@ -4,6 +4,7 @@ const { Schema } = mongoose;
 
 const SchoolSchema = new Schema(
   {
+    user_Id: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
     name: {
       type: String,
     },
@@ -19,6 +20,9 @@ const SchoolSchema = new Schema(
     userID: {
       type: String,
     },
+    isSubbranch: {
+      type: String,
+    },
     resetPassowrdToken: String,
     resetPasswordExpires: Date,
     logo: String,
@@ -27,6 +31,7 @@ const SchoolSchema = new Schema(
     email: String,
     telephone: String,
     password: String,
+    pass:String,
   },
   { timestamps: true }
 );

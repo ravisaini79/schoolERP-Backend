@@ -4,6 +4,7 @@ const { Schema } = mongoose;
 
 const PayrowSchema = new Schema(
   {
+    user_Id: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
     type: {
       type: String,
       default: "pay",

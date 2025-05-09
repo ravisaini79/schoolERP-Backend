@@ -4,6 +4,7 @@ const { Schema } = mongoose;
 
 const TransactionSchema = new Schema(
   {
+    user_Id: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
     amount: {
       type: String,
       required: true,

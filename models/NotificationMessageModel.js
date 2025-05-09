@@ -4,6 +4,7 @@ const { Schema } = mongoose;
 
 const NotificationsSchema = new Schema(
   {
+    user_Id: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
     date: {
       type: Date,
       default: Date.now,

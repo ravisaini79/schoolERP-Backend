@@ -4,6 +4,7 @@ const { Schema } = mongoose;
 
 const FilesSchema = new Schema(
   {
+    user_Id: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
     topic: {
       type: String,
     },

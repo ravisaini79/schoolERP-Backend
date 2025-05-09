@@ -4,6 +4,7 @@ const { Schema } = mongoose;
 
 const StudentSchema = new Schema(
   {
+    user_Id: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
     userID: {
       type: String,
       required: true,
@@ -146,6 +147,7 @@ const StudentSchema = new Schema(
       type: Date,
       default: Date.now,
     },
+    pass:String,
   },
   { timestamps: true }
 );

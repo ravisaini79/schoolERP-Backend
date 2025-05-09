@@ -4,6 +4,7 @@ const { Schema } = mongoose;
 
 const ChatSchema = new Schema(
   {
+    user_Id: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
     userID: {
       type: String,
     },

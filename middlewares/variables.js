@@ -3,6 +3,7 @@ const role = {
   Teacher: "teacher",
   NonTeacher: "nonteacher",
   Admin: "admin",
+  SuperAdmin: "Superadmin",
 };
 
 module.exports = {

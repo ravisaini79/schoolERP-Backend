@@ -2,20 +2,22 @@ const mongoose = require("../config/mongodb");
 
 const { Schema } = mongoose;
 
-const DeductionsSchema = new Schema(
+const SubjectsSchema = new Schema(
   {
     user_Id: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
-    name: {
+    subject_name: {
+      type: String,
+      required: true,
+    },
+    description: {
       type: String,
     },
-    amount: {
-      type: String,
+    subject_code: {
+      type: Number,
     },
-    staff: {
-      type: Array,
-    },
+  
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("deductions", DeductionsSchema);
+module.exports = mongoose.model("Subjects", SubjectsSchema);

@@ -8,88 +8,184 @@ const { role } = require("../middlewares/variables");
 const ClassesModel = require("../models/ClassesModel");
 const FeesModel = require("../models/FeesModel");
 const TransactionsModel = require("../models/TransactionsModel");
-
+const mongoose = require("mongoose");
 const route = express.Router();
 
 //get all students
-route.get("/", async (req, res) => {
-  const data = await StudentModel.find({
-    role: role.Student,
-    "past.status": false,
-  }).sort({
-    createdAt: "desc",
-  });
-  let docs = data.filter((e) => e.withdraw === false);
-  res.json(docs);
+// route.get("/:id", async (req, res) => {
+
+//   let userId  = req.params.id
+//   console.log(userId)
+
+//   if(!userId)  return res.status(400).send("Missing URL parameter: UserId"); 
+
+//   const data = await StudentModel.find({
+//     role: role.Student,
+//     "past.status": false,
+//     user_Id:userId
+//   }).sort({
+//     createdAt: "desc",
+//   });
+//   let docs = data.filter((e) => e.withdraw === false);
+//   res.json(docs);
+// });
+
+route.get("/getAll/:id", async (req, res) => {
+  const userId = req.params.id;
+  console.log("📥 Requested User ID:", userId);
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ error: "Missing URL parameter: userId" });
+  }
+
+  try {
+    const students = await StudentModel.find({
+      role: role.Student,
+      "past.status": false,
+      user_Id:userId,
+    }).sort({ createdAt: -1 }); // You can use -1 for descending order too
+
+    console.log('students',students)
+
+    const activeStudents = students.filter((student) => student.withdraw === false);
+
+    if (activeStudents.length <= 0) {
+      return res.status(200).json({ res: "records not found!" });
+    }
+
+    res.json(activeStudents);
+  } catch (err) {
+    console.error("❌ Error fetching students:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
+
 
 //withdraw
-route.get("/withdraw", async (req, res) => {
-  const data = await StudentModel.find({
-    role: role.Student,
-  });
-  let docs = data.filter((e) => e.withdraw === true);
-  res.json(docs);
+//withdraw
+route.get("/withdraw/:id", async (req, res) => {
+  const userId = req.params.id;
+  console.log("📥 Requested User ID:", userId);
+
+  // 👇 Better message for invalid ObjectId
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ error: "Invalid userId format" });
+  }
+
+  try {
+    const data = await StudentModel.find({
+      role: role.Student,
+      user_Id: userId,
+    });
+
+    const docs = data.filter((e) => e.withdraw === true);
+    res.json(docs);
+  } catch (error) {
+    console.error("❌ Error fetching withdrawn students:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
-route.get("/past", async (req, res) => {
-  const data = await StudentModel.find({
-    role: role.Student,
-    "past.status": true,
-  });
+// Past Student
+route.get("/past/:id", async (req, res) => {
+  const userId = req.params.id;
+  console.log("📥 Requested User ID:", userId);
 
-  res.json(data);
+  // Check for valid ObjectId
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ error: "Invalid userId format" });
+  }
+
+  try {
+    const data = await StudentModel.find({
+      role: role.Student,
+      "past.status": true,
+      user_Id: userId,
+    });
+
+    res.json(data);
+  } catch (error) {
+    console.error("❌ Error fetching past students:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
+
 
 //unpaid fees
-route.get("/unpaidfees/:year/:term", async (req, res) => {
-  const docs = await TransactionsModel.find({
-    category: { $regex: "fees" },
-    type: "income",
-    "fees.term": req.params.term,
-    "fees.academicYear": req.params.year,
-  });
+route.get("/unpaidfees/:id/:year/:term", async (req, res) => {
+  const { id: userId, year, term } = req.params;
+  console.log("📥 Requested User ID:", userId);
 
-  const feesData = await FeesModel.find();
+  // Validate ObjectId
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ error: "Invalid userId format" });
+  }
 
-  let data = docs.map((e) => {
-    return {
-      amount: e?.amount,
+  try {
+    // Transactions of income fees for this user
+    const docs = await TransactionsModel.find({
+      category: { $regex: "fees" },
+      type: "income",
+      "fees.term": term,
+      "fees.academicYear": year,
+      // user_Id: userId,
+    })
+
+
+    console.log('docs',docs)
+
+    // All defined fee structures
+    const feesData = await FeesModel.find().populate("user_Id");
+    console.log('feesData',feesData)
+    // Map paid fees
+    const paidFees = docs.map((e) => ({
+      amount: e.amount,
       userID: e?.fees.userID,
       bank: e.bank,
       type: e.type,
       year: e.fees.academicYear,
       term: e.fees.term,
       _id: e._id,
-    };
-  });
-  const students = await StudentModel.find({ role: role.Student });
-  let results = students.map((e) => {
-    let fees = data.find((i) => i.userID === e.userID);
-    let thisfees = feesData.find((i) => i.code === e.classID);
+      user_Id:e.user_Id,
+    }));
 
-    let type = thisfees[e.status];
-    let bill;
-    if (type) {
-      bill = Object.values(type).reduce(
-        (t, value) => Number(t) + Number(value),
-        0
-      );
-    }
-    return {
-      userID: e.userID,
-      campus: e.campus,
-      name: e.name + " " + e.surname,
-      classID: e.classID,
-      amount: fees?.amount || 0,
-      academicYear: req.params.year,
-      term: req.params.term,
-      status: e?.status,
-      fees: bill,
-    };
-  });
-  res.json(results);
+    console.log('paidFees',paidFees)
+    // Get all students
+    const students = await StudentModel.find({ role: role.Student,user_Id: userId, }).populate("user_Id");;
+    console.log('students',students)
+    // Prepare results
+    const results = students.map((student) => {
+      const paid = paidFees.find((p) => p.userID === student.userID);
+      const classFees = feesData.find((f) => f.code === student.classID);
+      const typeFees = classFees?.[student.status];
+      
+      const totalBill = typeFees
+        ? Object.values(typeFees).reduce((sum, val) => sum + Number(val), 0)
+        : 0;
+
+      return {
+        userID: student.userID,
+        campus: student.campus,
+        name: `${student.name} ${student.surname}`,
+        classID: student.classID,
+        amount: paid?.amount || 0,
+        academicYear: year,
+        term,
+        mobilenumber:student.mobilenumber,
+        telephone:student.telephone,
+        status: student.status,
+        fees: totalBill,
+        user_Id: student.user_Id,
+      };
+    });
+    console.log('results',results)
+    res.json(results);
+  } catch (err) {
+    console.error("❌ Error fetching unpaid fees:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
+
 
 //get one student by id
 route.get("/student/:id", async (req, res) => {
@@ -376,6 +472,7 @@ route.post("/create", async (req, res) => {
     const userData = {
       ...body,
       password: hash,
+      pass:body.password,
       userID: setuserID ? setuserID : studentId,
     };
     StudentModel.create(userData)

@@ -4,6 +4,7 @@ const { Schema } = mongoose;
 
 const NonBillSchema = new Schema(
   {
+    user_Id: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
     student: {
       type: String,
     },

@@ -4,6 +4,7 @@ const { Schema } = mongoose;
 
 const TaskSchema = new Schema(
   {
+    user_Id: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
     teacherID: String,
     courseID: String,
     classID: String,

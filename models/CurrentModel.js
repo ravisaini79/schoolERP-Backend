@@ -4,6 +4,7 @@ const { Schema } = mongoose;
 
 const AcademicYearSchema = new Schema(
   {
+    user_Id: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
     currentYear: {
       type: String,
     },
