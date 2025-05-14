@@ -71,9 +71,7 @@ const StudentSchema = new Schema(
     mobilenumber: {
       type: String,
     },
-    classID: {
-      type: String,
-    },
+    classID:{ type: mongoose.Schema.Types.ObjectId, ref: "classes" },
     guadian: {
       type: [
         {

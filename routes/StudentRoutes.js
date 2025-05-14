@@ -61,6 +61,43 @@ route.get("/getAll/:id", async (req, res) => {
 });
 
 
+route.get("/getAll/:classId/:id", async (req, res) => {
+  const userId = req.params.id;
+  const classId = req.params.classId
+  console.log("📥 Requested User ID:", userId);
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ error: "Missing URL parameter: userId" });
+  }
+
+    if (!mongoose.Types.ObjectId.isValid(classId)) {
+    return res.status(400).json({ error: "Missing URL parameter: classId" });
+  }
+
+
+  try {
+    const students = await StudentModel.find({
+      role: role.Student,
+      "past.status": false,
+      user_Id:userId,
+      classID:classId
+    }).sort({ createdAt: -1 }); // You can use -1 for descending order too
+
+    console.log('students',students)
+
+    const activeStudents = students.filter((student) => student.withdraw === false);
+
+    if (activeStudents.length <= 0) {
+      return res.status(200).json({ res: "records not found!" });
+    }
+
+    res.json(activeStudents);
+  } catch (err) {
+    console.error("❌ Error fetching students:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 //withdraw
 //withdraw
 route.get("/withdraw/:id", async (req, res) => {

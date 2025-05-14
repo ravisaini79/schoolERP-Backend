@@ -13,7 +13,7 @@ const SubjectsSchema = new Schema(
       type: String,
     },
     subject_code: {
-      type: Number,
+      type: String,
     },
   
   },
