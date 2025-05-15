@@ -29,7 +29,28 @@ const route = express.Router();
 //   let docs = data.filter((e) => e.withdraw === false);
 //   res.json(docs);
 // });
+// Add this route to your backend (students.js)
+route.get("/school/:schoolId", async (req, res) => {
+  const { schoolId } = req.params;
+  
+  if (!mongoose.Types.ObjectId.isValid(schoolId)) {
+    return res.status(400).json({ error: "Invalid schoolId format" });
+  }
 
+  try {
+    const students = await StudentModel.find({
+      role: role.Student,
+      "past.status": false,
+      user_Id: schoolId
+    }).sort({ createdAt: -1 });
+
+    const activeStudents = students.filter(student => student.withdraw === false);
+    res.json(activeStudents);
+  } catch (error) {
+    console.error("Error fetching students by school:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 route.get("/getAll/:id", async (req, res) => {
   const userId = req.params.id;
   console.log("📥 Requested User ID:", userId);
