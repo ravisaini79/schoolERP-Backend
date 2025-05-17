@@ -12,7 +12,18 @@ route.get("/", async (req, res) => {
 });
 
 //search event by name
-
+// Add this route to your existing sectionsRoutes.js
+route.get("/school/:schoolId", async (req, res) => {
+  try {
+    const docs = await Section.find({ user_Id: req.params.schoolId }).sort({
+      createdAt: "desc",
+    });
+    res.json(docs);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ success: false, error: "Server error" });
+  }
+});
 //get one by id
 route.get("/:id", async (req, res) => {
   if (!req.params.id) {

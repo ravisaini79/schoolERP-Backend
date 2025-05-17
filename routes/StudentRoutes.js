@@ -82,7 +82,28 @@ route.get("/getAll/:id", async (req, res) => {
 });
 
 
-//withdraw
+//
+// Get withdrawn students by school
+route.get("/withdraw/school/:schoolId", async (req, res) => {
+  const { schoolId } = req.params;
+  
+  if (!mongoose.Types.ObjectId.isValid(schoolId)) {
+    return res.status(400).json({ error: "Invalid schoolId format" });
+  }
+
+  try {
+    const students = await StudentModel.find({
+      role: role.Student,
+      withdraw: true,
+      user_Id: schoolId
+    }).sort({ createdAt: -1 });
+
+    res.json(students);
+  } catch (error) {
+    console.error("Error fetching withdrawn students by school:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 //withdraw
 route.get("/withdraw/:id", async (req, res) => {
   const userId = req.params.id;
@@ -106,7 +127,27 @@ route.get("/withdraw/:id", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+// Add this route to your backend (students.js)
+route.get("/past/school/:schoolId", async (req, res) => {
+  const { schoolId } = req.params;
+  
+  if (!mongoose.Types.ObjectId.isValid(schoolId)) {
+    return res.status(400).json({ error: "Invalid schoolId format" });
+  }
 
+  try {
+    const students = await StudentModel.find({
+      role: role.Student,
+      "past.status": true,
+      user_Id: schoolId
+    }).sort({ createdAt: -1 });
+
+    res.json(students);
+  } catch (error) {
+    console.error("Error fetching past students by school:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 // Past Student
 route.get("/past/:id", async (req, res) => {
   const userId = req.params.id;

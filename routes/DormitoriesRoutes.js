@@ -3,7 +3,7 @@ const Dormitories = require("../models/DormitoriesModel");
 
 const route = express.Router();
 
-//get all events
+// Get all dormitories
 route.get("/", async (req, res) => {
   const docs = await Dormitories.find().sort({
     createdAt: "desc",
@@ -11,9 +11,20 @@ route.get("/", async (req, res) => {
   res.json(docs);
 });
 
-//search event by name
+// Get dormitories by school (using user_Id)
+route.get("/school/:schoolId", async (req, res) => {
+  try {
+    const docs = await Dormitories.find({ user_Id: req.params.schoolId }).sort({
+      createdAt: "desc",
+    });
+    res.json(docs);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ success: false, error: "Server error" });
+  }
+});
 
-//get one by id
+// Get one by id
 route.get("/:id", async (req, res) => {
   if (!req.params.id) {
     return res.status(400).send("Missing URL parameter: username");
@@ -31,10 +42,9 @@ route.get("/:id", async (req, res) => {
     });
 });
 
-//create
+// Create dormitory
 route.post("/create", async (req, res) => {
   let body = req.body;
-  //create id
   Dormitories.create(body)
     .then((doc) => {
       res.json({ success: true, doc });
@@ -45,7 +55,7 @@ route.post("/create", async (req, res) => {
     });
 });
 
-//edit
+// Edit dormitory
 route.put("/update/:id", (req, res) => {
   if (!req.params.id) {
     return res.status(400).send("Missing URL parameter: username");
@@ -71,7 +81,7 @@ route.put("/update/:id", (req, res) => {
     });
 });
 
-//delete
+// Delete dormitory
 route.delete("/delete/:id", (req, res) => {
   if (!req.params.id) {
     return res.status(400).send("Missing URL parameter: username");

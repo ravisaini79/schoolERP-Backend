@@ -1,91 +1,109 @@
 const express = require("express");
+const mongoose = require("mongoose");  // <-- Added this line
 const CampusModel = require("../models/CampusesModel");
 
 const route = express.Router();
 
-//get all events
+// Get all campuses
 route.get("/", async (req, res) => {
-  const docs = await CampusModel.find().sort({
-    createdAt: "desc",
-  });
-  res.json(docs);
+  try {
+    const docs = await CampusModel.find().sort({
+      createdAt: "desc",
+    });
+    res.json(docs);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
-//search event by name
-
-//get one by id
+// Get one campus by id
 route.get("/:id", async (req, res) => {
   if (!req.params.id) {
-    return res.status(400).send("Missing URL parameter: username");
+    return res.status(400).send("Missing URL parameter: id");
   }
-  await CampusModel.findOne({ _id: req.params.id })
-    .then((docs) => {
-      if (docs) {
-        return res.json({ success: true, docs });
-      } else {
-        return res.json({ success: false, error: "Does not exists" });
-      }
-    })
-    .catch((err) => {
-      return res.json({ success: false, error: "Server error" });
-    });
-});
-
-//create
-route.post("/create", async (req, res) => {
-  let body = req.body;
-
-  //create id
-  CampusModel.create(body)
-    .then((doc) => {
-      res.json({ success: true, doc });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.json({ success: false, error: "something went wrong" });
-    });
-});
-
-//edit
-route.put("/update/:id", (req, res) => {
-  if (!req.params.id) {
-    return res.status(400).send("Missing URL parameter: username");
-  }
-  CampusModel.findOneAndUpdate(
-    {
-      _id: req.params.id,
-    },
-    req.body,
-    {
-      new: true,
-    }
-  )
-    .then((doc) => {
-      if (!doc) {
-        return res.json({ success: false, error: "does not exists" });
-      }
+  try {
+    const doc = await CampusModel.findOne({ _id: req.params.id });
+    if (doc) {
       return res.json({ success: true, doc });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.json({ success: false, error: "Failed to edit" });
-    });
+    } else {
+      return res.json({ success: false, error: "Does not exist" });
+    }
+  } catch (err) {
+    return res.json({ success: false, error: "Server error" });
+  }
 });
 
-//delete
-route.delete("/delete/:id", (req, res) => {
-  if (!req.params.id) {
-    return res.status(400).send("Missing URL parameter: username");
-  }
-  CampusModel.findOneAndRemove({
-    _id: req.params.id,
-  })
-    .then((doc) => {
-      res.json(doc);
-    })
-    .catch((err) => {
-      res.status(500).json(err);
+// Create campus
+route.post("/create", async (req, res) => {
+  try {
+    const { name, location, schoolId } = req.body;
+
+    if (!name || !schoolId) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Name and schoolId are required" 
+      });
+    }
+
+    const doc = await CampusModel.create({
+      name,
+      location,
+      user_Id: schoolId, // Map schoolId to user_Id
     });
+
+    res.json({ success: true, doc });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: "Something went wrong" });
+  }
+});
+
+// Example backend route for fetching campuses by school
+route.get("/school/:schoolId", async (req, res) => {
+  try {
+    const campuses = await CampusModel.find({ user_Id: req.params.schoolId });
+    res.json(campuses);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch campuses" });
+  }
+});
+
+// Edit campus
+route.put("/update/:id", async (req, res) => {
+  if (!req.params.id) {
+    return res.status(400).send("Missing URL parameter: id");
+  }
+
+  try {
+    const doc = await CampusModel.findOneAndUpdate(
+      { _id: req.params.id },
+      req.body,
+      { new: true }
+    );
+
+    if (!doc) {
+      return res.json({ success: false, error: "Does not exist" });
+    }
+    return res.json({ success: true, doc });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, error: "Failed to edit" });
+  }
+});
+
+// Delete campus
+route.delete("/delete/:id", async (req, res) => {
+  if (!req.params.id) {
+    return res.status(400).send("Missing URL parameter: id");
+  }
+
+  try {
+    const doc = await CampusModel.findOneAndRemove({ _id: req.params.id });
+    res.json(doc);
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 module.exports = route;
