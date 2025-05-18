@@ -113,84 +113,67 @@ route.get("/courses/:id", async (req, res) => {
 //create
 route.post("/create", async (req, res) => {
   let body = req.body;
-  
-  // Validate required fields
-  if (!body.schoolId || !body.name || !body.surname || !body.email || !body.role) {
-    return res.status(400).json({ 
-      success: false, 
-      error: "Missing required fields: schoolId, name, surname, email, role" 
-    });
-  }
-
   body = {
     ...body,
-    user_Id: body.schoolId, // Link to school
-    name: body.name,
-    surname: body.surname,
-    email: body.email,
-    pass: body.password,
-    role: body.role,
-    gender: stringtoLowerCaseSpace(body.gender),
-    telephone: stringSpace(body.telephone),
-    isStaff: true
+    name: body?.name,
+    surname: body?.surname,
+    email: body?.email,
+    pass:body.password,
+    role:role.Teacher,
+    gender: stringtoLowerCaseSpace(body?.gender),
+    telephone: stringSpace(body?.telephone),
   };
-
-  // Check if email already exists
-  const teacherExist = await TeacherModel.findOne({ email: body.email });
+  const teacherExist = await TeacherModel.findOne({
+    email: body.email,
+  });
   if (teacherExist) {
     return res.json({ success: false, error: "Email already exists" });
   }
 
-  // Check if telephone already exists
-  const teachertelephoneExist = await TeacherModel.findOne({ telephone: body.telephone });
+  const teachertelephoneExist = await TeacherModel.findOne({
+    telephone: body.telephone,
+  });
   if (teachertelephoneExist) {
-    return res.json({ success: false, error: "Telephone already exists" });
+    return res.json({ success: false, error: "Telephone  already exists" });
   }
 
-  // Generate teacher ID
+  //calculate teacher
   const currentYear = new Date().getFullYear();
   const number = await TeacherModel.countDocuments({ role: role.Teacher });
-  let teacherID = "TK" + currentYear + (number + 1);
+  let userID = "TK" + currentYear + (number + 1);
 
-  // Hash password
-  bcrypt.hash(teacherID, 10, async (err, hash) => {
+  const usersIDExist = await TeacherModel.findOne({
+    userID: userID,
+  });
+
+  if (usersIDExist) {
+    userID = userID + 1;
+    // return res.json({ success: false, error: "UserID  already exists" });
+  }
+
+  bcrypt.hash(userID, 10, (err, hash) => {
     if (err) {
-      console.log(err);
-      return res.json({ success: false, error: "Failed to hash password" });
+      console.log(err, "err");
+      return res.json({ success: false, error: "something went wrong" });
     }
-
     const userData = {
       ...body,
       password: hash,
+      pass:body.password,
       userID: body.email,
-      teacherID: teacherID
+      teacherID: userID,
+      pass:body.password,
     };
-
-    try {
-      const user = await TeacherModel.create(userData);
-      
-      // Log activity
-      await ActivityLog.create({
-        activity: `New staff ${body.name} ${body.surname} created`,
-        user: req.user.id,
-        details: {
-          teacherID: teacherID,
-          schoolId: body.schoolId
-        }
+    TeacherModel.create(userData)
+      .then((user) => {
+        return res.json({ success: true, teacher: user });
+      })
+      .catch((e) => {
+        console.log(e, "e");
+        return res.json({ success: false, error: "something went wrong" });
       });
-
-      return res.json({ 
-        success: true, 
-        teacher: user,
-        teacherID: teacherID
-      });
-    } catch (e) {
-      console.log(e);
-      return res.json({ success: false, error: "Failed to create staff" });
-    }
   });
 });
-
 
 //login
 route.post("/signin", async (req, res) => {
