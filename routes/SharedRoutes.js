@@ -80,6 +80,73 @@ route.get("/staff/count/:id", async (req, res) => {
 });
 
 //count
+
+route.get("/count/:schoolId", async (req, res) => {
+  const { schoolId } = req.params;
+  
+  let query = { role: role.Student };
+  let staffQuery = { isStaff: true };
+  
+  // If schoolId is not "all", filter by school
+  if (schoolId !== "all") {
+    query.user_Id = schoolId;
+    staffQuery.user_Id = schoolId;
+  }
+
+  const students = await StudentModel.countDocuments(query);
+  const femaleStudents = await StudentModel.countDocuments({
+    ...query,
+    gender: "female",
+  });
+  const maleStudents = await StudentModel.countDocuments({
+    ...query,
+    gender: "male",
+  });
+
+  const studentsData = await StudentModel.find(query).exec();
+
+  const staff = await TeacherModels.countDocuments(staffQuery);
+  const femaleStaff = await TeacherModels.countDocuments({
+    ...staffQuery,
+    gender: "female",
+  });
+  const maleStaff = await TeacherModels.countDocuments({
+    ...staffQuery,
+    gender: "male",
+  });
+
+  const staffData = await TeacherModels.find(staffQuery).exec();
+
+
+
+
+  const campuses = await Campus.countDocuments(schoolId !== "all" ? { user_Id: schoolId } : {});
+  const classes = await ClassesModel.countDocuments(schoolId !== "all" ? { user_Id: schoolId } : {})
+  const prefects = await PrefectsModel.countDocuments(schoolId !== "all" ? { user_Id: schoolId } : {});
+  const sections = await Sections.countDocuments(schoolId !== "all" ? { user_Id: schoolId } : {});
+  const courses = await CoursesModels.countDocuments(schoolId !== "all" ? { user_Id: schoolId } : {});
+  const departments = await DepartmentsModels.countDocuments(schoolId !== "all" ? { user_Id: schoolId } : {});
+  const scholarships = await ScholarshipsModels.countDocuments(schoolId !== "all" ? { user_Id: schoolId } : {});
+  const divisions = await DivisionsModels.countDocuments(schoolId !== "all" ? { user_Id: schoolId } : {});
+  res.json({
+    // ... your existing response
+    students,
+    staff,
+    campuses,
+    divisions,
+    scholarships,
+    classes,
+    courses,
+    sections,
+    departments,
+    prefects,
+    femaleStudents,
+    maleStudents,
+    femaleStaff,
+    maleStaff,
+  });
+});
+
 route.get("/student/count/:id", async (req, res) => {
   if (!req.params.id) {
     return res.status(400).send("Missing URL parameter: username");
@@ -558,5 +625,97 @@ route.post("/sendmail", async (req, res) => {
   });
 });
 
+const buildQuery = (schoolId, baseQuery = {}) => {
+  if (schoolId && schoolId !== "all") {
+    return { ...baseQuery, user_Id: schoolId };
+  }
+  return baseQuery;
+};
 
+// Count endpoint with school filtering
+route.get("/count/:schoolId", async (req, res) => {
+  try {
+    const { schoolId } = req.params;
+    
+    // Validate schoolId parameter
+    if (!schoolId) {
+      return res.status(400).json({ error: "School ID parameter is required" });
+    }
+
+    // Create base queries with optional school filter
+    const createQuery = (baseQuery = {}) => 
+      schoolId !== "all" ? { ...baseQuery, user_Id: schoolId } : baseQuery;
+
+    // Student-related counts
+    const studentQuery = createQuery({ role: role.Student });
+    const [students, femaleStudents, maleStudents] = await Promise.all([
+      StudentModel.countDocuments(studentQuery),
+      StudentModel.countDocuments({ ...studentQuery, gender: "female" }),
+      StudentModel.countDocuments({ ...studentQuery, gender: "male" })
+    ]);
+
+    // Staff-related counts
+    const staffQuery = createQuery({ isStaff: true });
+    const [staff, femaleStaff, maleStaff] = await Promise.all([
+      TeacherModels.countDocuments(staffQuery),
+      TeacherModels.countDocuments({ ...staffQuery, gender: "female" }),
+      TeacherModels.countDocuments({ ...staffQuery, gender: "male" })
+    ]);
+
+    // Other counts
+    const [
+      campuses,
+      classes,
+      prefects,
+      sections,
+      courses,
+      departments,
+      scholarships,
+      divisions
+    ] = await Promise.all([
+      Campus.countDocuments(createQuery()),
+      ClassesModel.countDocuments(createQuery()),
+      PrefectsModel.countDocuments(createQuery()),
+      Sections.countDocuments(createQuery()),
+      CoursesModels.countDocuments(createQuery()),
+      DepartmentsModels.countDocuments(createQuery()),
+      ScholarshipsModels.countDocuments(createQuery()),
+      DivisionsModels.countDocuments(createQuery())
+    ]);
+
+    // Response structure
+    res.json({
+      success: true,
+      counts: {
+        students,
+        staff,
+        campuses,
+        classes,
+        prefects,
+        sections,
+        courses,
+        departments,
+        scholarships,
+        divisions,
+        femaleStudents,
+        maleStudents,
+        femaleStaff,
+        maleStaff,
+        // Additional metrics can be added here
+      },
+      meta: {
+        schoolFilter: schoolId,
+        timestamp: new Date().toISOString()
+      }
+    });
+
+  } catch (error) {
+    console.error("Error in /count endpoint:", error);
+    res.status(500).json({ 
+      success: false,
+      error: "Internal server error",
+      details: error.message 
+    });
+  }
+});
 module.exports = route;

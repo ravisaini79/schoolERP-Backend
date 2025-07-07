@@ -8,6 +8,21 @@ const Payrow = require("../models/PayRow.Model");
 
 const route = express.Router();
 
+// Add this route to your existing teachersRoutes.js
+route.get("/school/:schoolId", async (req, res) => {
+  try {
+    const docs = await TeacherModel.find({ 
+      isStaff: true,
+      user_Id: req.params.schoolId 
+    }).sort({
+      createdAt: "desc",
+    });
+    res.json(docs);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ success: false, error: "Server error" });
+  }
+});
 //all teachers
 route.get("/", async (req, res) => {
   const data = await TeacherModel.find({ isStaff: true }).sort({

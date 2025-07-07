@@ -126,6 +126,7 @@ app.use("/api/deductions", DeductionsRoutes);
 app.use("/api/nonbillpayment", NonPaymentRoutes);
 app.use('/api/generatebill',generatebill);
 
+
 app.listen(PORT, () => {
   return console.log(`listening on port ${PORT}`);
 });

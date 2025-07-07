@@ -10,6 +10,18 @@ route.get("/", async (req, res) => {
   res.json(data);
 });
 
+// Add this route to your existing departmentsRoutes.js
+route.get("/school/:schoolId", async (req, res) => {
+  try {
+    const docs = await DepartmentsModel.find({ user_Id: req.params.schoolId }).sort({
+      createdAt: "desc",
+    });
+    res.json(docs);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ success: false, error: "Server error" });
+  }
+});
 //create
 route.post("/create", async (req, res) => {
   let body = req.body;
