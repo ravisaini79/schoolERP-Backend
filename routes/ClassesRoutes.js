@@ -21,6 +21,18 @@ route.get("/all", async (req, res) => {
   res.json(docs);
 });
 
+route.get("/getby/:userId", async (req, res) => {
+  try {
+    const user_Id = req.params.userId;
+
+    const docs = await ClassesModel.find({ user_Id: user_Id })
+    console.log("docs>", docs);
+    res.json(docs);
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+});
+
 route.get("/past", async (req, res) => {
   const docs = await ClassesModel.find().sort({
     createdAt: "desc",

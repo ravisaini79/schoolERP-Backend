@@ -46,6 +46,7 @@ const NonPaymentRoutes = require("./routes/NonBillPaymentRoutes");
 const generatebill = require('./models/generatebill')
 const SchoolSubbranchRoutes = require("./routes/SchoolSubbranchRoutes");
 const subjectGroupRoutes = require('./routes/SubjectGroup');
+const assignsubjectsRoutes = require('./routes/assignsubjects');
 const path = require("path");
 //const __dirname = path.resolve(path.dirname(""));
 
@@ -81,7 +82,7 @@ app.get("/", (req, res) => {
 
 
 app.use('/api/subject-groups', subjectGroupRoutes);
-
+app.use("/api/assignsubjects", assignsubjectsRoutes);
 app.use("/api/subjects", subjectRoutes);
 app.use("/api/subbranches", SchoolSubbranchRoutes);
 app.use("/api/students", StudentRoutes);

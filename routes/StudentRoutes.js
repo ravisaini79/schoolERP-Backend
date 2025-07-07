@@ -82,28 +82,44 @@ route.get("/getAll/:id", async (req, res) => {
 });
 
 
-//
-// Get withdrawn students by school
-route.get("/withdraw/school/:schoolId", async (req, res) => {
-  const { schoolId } = req.params;
-  
-  if (!mongoose.Types.ObjectId.isValid(schoolId)) {
-    return res.status(400).json({ error: "Invalid schoolId format" });
+route.get("/getAll/:classId/:id", async (req, res) => {
+  const userId = req.params.id;
+  const classId = req.params.classId
+  console.log("📥 Requested User ID:", userId);
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ error: "Missing URL parameter: userId" });
   }
+
+    if (!mongoose.Types.ObjectId.isValid(classId)) {
+    return res.status(400).json({ error: "Missing URL parameter: classId" });
+  }
+
 
   try {
     const students = await StudentModel.find({
       role: role.Student,
-      withdraw: true,
-      user_Id: schoolId
-    }).sort({ createdAt: -1 });
+      "past.status": false,
+      user_Id:userId,
+      classID:classId
+    }).sort({ createdAt: -1 }); // You can use -1 for descending order too
 
-    res.json(students);
-  } catch (error) {
-    console.error("Error fetching withdrawn students by school:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.log('students',students)
+
+    const activeStudents = students.filter((student) => student.withdraw === false);
+
+    if (activeStudents.length <= 0) {
+      return res.status(200).json({ res: "records not found!" });
+    }
+
+    res.json(activeStudents);
+  } catch (err) {
+    console.error("❌ Error fetching students:", err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+//withdraw
 //withdraw
 route.get("/withdraw/:id", async (req, res) => {
   const userId = req.params.id;
