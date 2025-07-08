@@ -4,11 +4,16 @@ const Section = require("../models/SectionModel");
 const route = express.Router();
 
 //get all events
-route.get("/", async (req, res) => {
-  const docs = await Section.find().sort({
-    createdAt: "desc",
-  });
-  res.json(docs);
+route.get("/:schoolId", async (req, res) => {
+  try {
+    const docs = await Section.find({ user_Id: req.params.schoolId }).sort({
+      createdAt: "desc",
+    });
+    res.json(docs || []);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ success: false, error: "Server error" });
+  }
 });
 
 //search event by name
@@ -46,6 +51,8 @@ route.get("/:id", async (req, res) => {
 //create
 route.post("/create", async (req, res) => {
   let body = req.body;
+
+  console.log(body,'>>>>>>.')
 
   //create id
   Section.create(body)

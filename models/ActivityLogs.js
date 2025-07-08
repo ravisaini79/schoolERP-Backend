@@ -4,6 +4,8 @@ const { Schema } = mongoose;
 
 const ActivitySchema = new Schema(
   {
+    
+ user_Id: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
     activity: {
       type: String,
     },

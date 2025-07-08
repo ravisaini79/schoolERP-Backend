@@ -125,6 +125,8 @@ app.use("/api/sba", SBARoutes);
 app.use("/api/deductions", DeductionsRoutes);
 app.use("/api/nonbillpayment", NonPaymentRoutes);
 app.use('/api/generatebill',generatebill);
+app.use("/api/teacher-subject", require("./routes/Assignsubtoteacher"));
+
 
 
 app.listen(PORT, () => {
