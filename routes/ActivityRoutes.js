@@ -35,7 +35,10 @@ route.get("/:id", async (req, res) => {
 route.post("/create", async (req, res) => {
   let body = req.body;
 
+  console.log(body,"<<<<<<<<")
+
   //create id
+
   ActivityModel.create(body)
     .then((doc) => {
       res.json({ success: true, doc });
